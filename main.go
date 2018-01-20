@@ -20,11 +20,11 @@ type templateHandler struct {
 	templ    *template.Template
 }
 
-func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (t *templateHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	t.once.Do(func() {
 		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
 	})
-	t.templ.Execute(w, r)
+	t.templ.Execute(rw, req)
 }
 
 var opt options
@@ -39,11 +39,16 @@ func init() {
 }
 
 func main() {
+	r := newRoom()
+
 	http.Handle("/", &templateHandler{filename: "chat.html"})
+	http.Handle("/room", r)
+
+	go r.run()
 
 	log.Printf("listening on port %v", opt.port)
 
 	if err := http.ListenAndServe(":"+opt.port, nil); err != nil {
-		log.Fatalf("ListenAndServe:%s", err)
+		log.Fatalf("ListenAndServe: %s", err)
 	}
 }
