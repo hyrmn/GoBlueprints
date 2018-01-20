@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/hyrmn/GoBlueprints/trace"
 )
 
 type options struct {
@@ -40,6 +42,7 @@ func init() {
 
 func main() {
 	r := newRoom()
+	r.tracer = trace.New(os.Stdout)
 
 	http.Handle("/", &templateHandler{filename: "chat.html"})
 	http.Handle("/room", r)
